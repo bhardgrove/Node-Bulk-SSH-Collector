@@ -1,5 +1,5 @@
 /**
- * @author     Bob Hardgrove <bob.hardgrove@t-mobile.com>
+ * @author     Bob Hardgrove <bhardgrove@gmail.com>
  *
  * @since      Released 2016-12-29
  * Application sends a request to http://0.0.0.0:3000 which is a MySQL DB
