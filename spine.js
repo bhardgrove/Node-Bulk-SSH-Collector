@@ -66,7 +66,6 @@ function parseOutputLatency(stdout)
         if(cmd) {
             var ip = cmd.replace("ping ", "");
         }
-        //console.log(ip)
         stdout = stdout.replace(/[\r\n]/g, " ");
         stdout = stdout.replace(/[,!-]/g, "");
         var data = {};
