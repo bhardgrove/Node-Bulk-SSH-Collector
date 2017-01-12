@@ -6,7 +6,7 @@
  * @todo Filter query and show only a distinct list of hosts
  * Once a 200 OK is received, turn results into an object.
  * Loop through object logging into each device once, and run all commands for that host
- * This script is to be used with a wrapper and syntax is "node spine.js ORCARO31"
+ * This script is to be used with a wrapper and syntax is "node spine.js hostname"
  */
 
 var fs = require('fs');
