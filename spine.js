@@ -136,8 +136,8 @@ function shipToElastic5(data)
     var client = new elasticsearch.Client({
         host: [
         {
-         host: '10.92.28.63',
-         auth: 'elastic:changeme',
+         host: 'x.x.x.x',
+         auth: 'user:password',
          port: 9200
         }
         
