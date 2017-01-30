@@ -2,26 +2,26 @@
  * @author     Bob Hardgrove <bhardgrove@gmail.com>
  *
  * @since      Released 2016-12-29
- * Application sends a request to http://0.0.0.0:3000 which is a MySQL DB
+ * Application sends a request to http://x.x.x.x:3000 which is a MySQL DB
  * @todo Filter query and show only a distinct list of hosts
  * Once a 200 OK is received, turn results into an object.
  * Loop through object logging into each device once, and run all commands for that host
- * This script is to be used with a wrapper and syntax is "node spine.js hostname"
+ * This script is to be used with a wrapper and syntax is "node spine.js device"
  */
 
+var moment = require('moment');
 var fs = require('fs');
 var os = require('os');
 var request = require('request');
-var _ = require('underscore');
 var sshexec = require('ssh-exec');
 var elasticsearch = require('elasticsearch');
 var client = new elasticsearch.Client({
-        hosts: ['192.168.1.1:9200', '192.168.1.2:9200'],
+        hosts: ['X.X.X.X:9200', 'X.X.X.X:9200'],
     });
-var url = "http://192.168.1.1:3000/all"; // Grab all DB info
-var hosts = "http://192.168.1.2:3000/host" // Grab all hosts
+var url = "http://X.X.X.X:3000/all"; // Grab all DB info
+var hosts = "http://X.X.X.XX:3000/host" // Grab all hosts
 
-var specificHost = 'http://192.168.1.3:3000/all/' + process.argv[2];
+var specificHost = 'http://xx.xx.x.x:3000/all/' + process.argv[2];
 
 var cmdlist;
 var obj;
@@ -52,13 +52,14 @@ function sshToHost(host, user, password, cmdlist)
 function showOutput(err, stdout, stderr) 
 {
     var data = parseOutputLatency(stdout);
-    console.log(stdout);
+    //console.log(stdout);
   
 }
 
 function parseOutputLatency(stdout)
 {
-    var size = Object.keys(obj).length;
+    //var size = Object.keys(obj).length;
+    var size = obj.cmd.length;
 
     for (var i = 0; i <= size; i++) {
         var cmd = obj.cmd[i];
@@ -66,6 +67,7 @@ function parseOutputLatency(stdout)
         if(cmd) {
             var ip = cmd.replace("ping ", "");
         }
+        //console.log(ip)
         stdout = stdout.replace(/[\r\n]/g, " ");
         stdout = stdout.replace(/[,!-]/g, "");
         var data = {};
@@ -76,6 +78,7 @@ function parseOutputLatency(stdout)
         if(ip) {
             data['ip'] = ip;
         }
+        
         data['suc'] = suc;
         data['raw'] = stdout;
         data['host'] = obj.host[i];
@@ -106,7 +109,8 @@ function parseOutputLatency(stdout)
         }
         data['tags'] = 'latency, rtt, ping, main_100gb_latency';
         console.log(data);
-        shipToElastic(data);
+        //shipToElastic(data);
+        shipToElastic5(data);
     }
 
     return data;
@@ -125,6 +129,35 @@ function shipToElastic(data)
         console.log(err);
     });
 }
+
+
+function shipToElastic5(data)
+{
+    var client = new elasticsearch.Client({
+        host: [
+        {
+         host: '10.92.28.63',
+         auth: 'elastic:changeme',
+         port: 9200
+        }
+        
+        ]
+    });
+
+    var month = moment().month() + 1; // JS Month range default is 0-11
+ 
+    client.index({
+        index: 'latency-2017-0' + month,
+        type: 'latency',
+        body: {
+            data,
+            timestamp: new Date(),
+        }
+    }, function elasticResults(err, resp, status) {
+        console.log(err);
+    });
+}
+
 
 /**
  * Takes the body of the URL and creates an Object
